@@ -1,6 +1,6 @@
 package main
 
-denylist = ["openjdk"]
+denylist = ["amazoncorretto"]
 
 deny[msg] {
 	input[i].Cmd == "from"

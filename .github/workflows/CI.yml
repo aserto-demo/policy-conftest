@@ -20,7 +20,7 @@ jobs:
 
       - name: Install Policy CLI
         run: |
-          wget -P /tmp "https://github.com/opcr-io/policy/releases/download/v0.1.26/policy0.1.26_linux_x86_64.zip"
+          wget -q -P /tmp "https://github.com/opcr-io/policy/releases/download/v0.1.26/policy0.1.26_linux_x86_64.zip"
           cd /tmp && unzip policy0.1.26_linux_x86_64.zip 
           chmod +x /tmp/policy
 
@@ -31,15 +31,17 @@ jobs:
 
       - name: Bump policy version
         run: |
-          wget -O /tmp/semver "https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver"
+          wget -q -O /tmp/semver "https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver"
           chmod +x /tmp/semver
           CUR_VERSION=$(/tmp/policy images --remote -o ${{ secrets.POLICY_USERNAME }}|grep "$POLICY_REPO"|awk '{print $2;}')
           NEW_VERSION=$(/tmp/semver bump minor $CUR_VERSION)
           echo "TAG=$NEW_VERSION" >> $GITHUB_ENV
 
-      - name: Build policy
+      - name: Build and push policy
         run: |
           /tmp/policy build . -t $POLICY_REPO:$TAG
+          /tmp/policy tag $POLICY_REPO:$TAG $POLICY_REPO:latest
+          /tmp/policy push $POLICY_REPO:latest
           /tmp/policy push $POLICY_REPO:$TAG
 
       - name: Sign policy

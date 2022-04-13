@@ -33,8 +33,8 @@ jobs:
         run: |
           wget -O /tmp/semver "https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver"
           chmod +x /tmp/semver
-          OLD_VERSION=$(policy images --remote -o ${{ secrets.POLICY_USERNAME }}|grep "$POLICY_REPO"|awk '{print $2;}')
-          NEW_VERSION=$(/tmp/semver bump minor $CURRENT
+          OLD_VERSION=$(/tmp/policy images --remote -o ${{ secrets.POLICY_USERNAME }}|grep "$POLICY_REPO"|awk '{print $2;}')
+          NEW_VERSION=$(/tmp/semver bump minor $CURRENT)
           echo "TAG=$NEW_VERSION" >> $GITHUB_ENV
 
       - name: Build policy

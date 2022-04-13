@@ -1,0 +1,48 @@
+name: CI
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+  workflow_dispatch:
+
+env:
+  POLICY_REPO: "apoland/policy-conftest"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Policy CLI
+        run: |
+          wget -P /tmp "https://github.com/opcr-io/policy/releases/download/v0.1.26/policy0.1.26_linux_x86_64.zip"
+          cd /tmp && unzip policy0.1.26_linux_x86_64.zip 
+          chmod +x /tmp/policy
+
+      - name: Login to OPCR
+        run: |
+          echo ${{ secrets.POLICY_PASSWORD }} | /tmp/policy login -u ${{ secrets.POLICY_USERNAME }} --password-stdin
+          echo ${{ secrets.POLICY_PASSWORD }} | docker login opcr.io -u ${{ secrets.POLICY_USERNAME }} --password-stdin
+
+      - name: Bump policy version
+        run: |
+          wget -O /tmp/semver "https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver"
+          chmod +x /tmp/semver
+          OLD_VERSION=$(policy images --remote -o ${{ secrets.POLICY_USERNAME }}|grep "$POLICY_REPO"|awk '{print $2;}')
+          NEW_VERSION=$(/tmp/semver bump minor $CURRENT
+          echo "TAG=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: Build policy
+        run: |
+          /tmp/policy build . -t $POLICY_REPO:$TAG
+          /tmp/policy push $POLICY_REPO:$TAG
+
+      - name: Sign policy
+        run: |
+          echo "$COSIGN_KEY" >> cosign.key
+          echo /tmp/cosign sign -key cosign.key opcr.io/$POLICY_REPO:1.0.0

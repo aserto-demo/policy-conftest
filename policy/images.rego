@@ -1,6 +1,6 @@
 package main
 
-denylist = ["oracle-jdk"]
+denylist = ["openjdk"]
 
 deny[msg] {
 	input[i].Cmd == "from"

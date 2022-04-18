@@ -31,8 +31,6 @@ jobs:
 
       - name: Bump policy version
         run: |
-          #wget -q -O /tmp/semver "https://raw.githubusercontent.com/fsaintjacques/semver-tool/master/src/semver"
-          #chmod +x /tmp/semver
           #CUR_VERSION=$(/tmp/policy images --remote -o ${{ secrets.POLICY_USERNAME }}|grep "$POLICY_REPO"|awk '{print $2;}')
           #NEW_VERSION=$(/tmp/semver bump minor $CUR_VERSION)
           #echo "TAG=$NEW_VERSION" >> $GITHUB_ENV
@@ -48,4 +46,4 @@ jobs:
       - name: Sign policy
         run: |
           echo "$COSIGN_KEY" >> cosign.key
-          echo /tmp/cosign sign -key cosign.key opcr.io/$POLICY_REPO:1.0.0
+          echo /tmp/cosign sign -key cosign.key opcr.io/$POLICY_REPO:$TAG

@@ -29,21 +29,12 @@ jobs:
           echo ${{ secrets.POLICY_PASSWORD }} | /tmp/policy login -u ${{ secrets.POLICY_USERNAME }} --password-stdin
           echo ${{ secrets.POLICY_PASSWORD }} | docker login opcr.io -u ${{ secrets.POLICY_USERNAME }} --password-stdin
 
-      - name: Bump policy version
-        run: |
-          #CUR_VERSION=$(/tmp/policy images --remote -o ${{ secrets.POLICY_USERNAME }}|grep "$POLICY_REPO"|awk '{print $2;}')
-          #NEW_VERSION=$(/tmp/semver bump minor $CUR_VERSION)
-          #echo "TAG=$NEW_VERSION" >> $GITHUB_ENV
-          echo "TAG=1.0.0" >> $GITHUB_ENV
-
       - name: Build and push policy
         run: |
-          /tmp/policy build . -t $POLICY_REPO:$TAG
-          /tmp/policy tag $POLICY_REPO:$TAG $POLICY_REPO:latest
-          /tmp/policy push $POLICY_REPO:latest
-          /tmp/policy push $POLICY_REPO:$TAG
+          /tmp/policy build . -t $POLICY_REPO:1.0.0
+          /tmp/policy push $POLICY_REPO:1.0.0
 
       - name: Sign policy
         run: |
           echo "$COSIGN_KEY" >> cosign.key
-          echo /tmp/cosign sign -key cosign.key opcr.io/$POLICY_REPO:$TAG
+          echo /tmp/cosign sign -key cosign.key opcr.io/$POLICY_REPO:1.0.0

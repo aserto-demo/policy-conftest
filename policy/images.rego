@@ -1,6 +1,6 @@
 package main
 
-denylist = ["python", "node", "ruby"]
+denylist = ["python", "node", "ruby", "openjdk"]
 
 deny[msg] {
 	input[i].Cmd == "from"

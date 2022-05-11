@@ -22,19 +22,19 @@ jobs:
         run: |
           wget -q -P /tmp "https://github.com/opcr-io/policy/releases/download/v0.1.26/policy0.1.26_linux_x86_64.zip"
           cd /tmp && unzip policy0.1.26_linux_x86_64.zip 
-          chmod +x /tmp/policy
+          sudo mv policy /usr/local/bin && chmod +x /usr/local/bin/policy
 
       - name: Login to OPCR
         run: |
-          echo ${{ secrets.POLICY_PASSWORD }} | /tmp/policy login -u ${{ secrets.POLICY_USERNAME }} --password-stdin
+          echo ${{ secrets.POLICY_PASSWORD }} | policy login -u ${{ secrets.POLICY_USERNAME }} --password-stdin
           echo ${{ secrets.POLICY_PASSWORD }} | docker login opcr.io -u ${{ secrets.POLICY_USERNAME }} --password-stdin
 
       - name: Build and push policy
         run: |
-          /tmp/policy build . -t $POLICY_REPO:1.0.0
-          /tmp/policy push $POLICY_REPO:1.0.0
+          policy build . -t $POLICY_REPO:1.0.0
+          policy push $POLICY_REPO:1.0.0
 
       - name: Sign policy
         run: |
-          echo "$COSIGN_KEY" >> cosign.key
-          echo /tmp/cosign sign -key cosign.key opcr.io/$POLICY_REPO:1.0.0
+          echo "${{ secrets.COSIGN_PRIVATE_KEY }}" > cosign.key
+          echo cosign sign -key cosign.key opcr.io/$POLICY_REPO:1.0.0
